@@ -1,0 +1,10 @@
+﻿.boxIt-main {
+    margin: 10px
+}
+.boxIt-common {
+    /*width: 400px;*/
+    max-height: 200px;
+    overflow-y: auto;
+    
+}
+

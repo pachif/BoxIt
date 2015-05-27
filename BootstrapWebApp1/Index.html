@@ -1,0 +1,184 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BoxIt Organizer</title>
+
+    <!-- Bootstrap -->
+    <link href="Content/bootstrap.min.css" rel="stylesheet">
+    <link href="Content/CustomStyles.css" rel="stylesheet"/>
+    <!--<link href="Content/bootstrap-theme.min.css" rel="stylesheet">-->
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+	  <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.2/html5shiv.js"></script>
+	  <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="Scripts/jquery-1.9.1.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="Scripts/bootstrap.min.js"></script>
+    <script src="Scripts/boxit-common.js"></script>
+    <script src="Scripts/knockout-3.3.0.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-default" role="navigation">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">BoxIT</a>
+            </div>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="#">Your Boxes</a></li>
+                    <li><a href="#">Save</a></li>
+                </ul>
+                <div class="nav navbar-nav navbar-right">
+                    <form class="navbar-form navbar-left" role="search">
+                        <div class="form-group">
+                            <input type="text" class="form-control" placeholder="Search">
+                        </div>
+                        <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
+                    </form>
+                </div>
+
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container-fluid -->
+    </nav>
+    <div class="container">
+        <div class="jumbotron">
+            <h1>Hello, user!</h1>
+            <p>This Application will blow your mind</p>
+        </div>
+    
+        <div class="row">
+        
+            <div class="col-sm-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <span>BoxIt Work Area </span>
+                        <div class="pull-right">
+                            <button id="addNoteButton" class="btn btn-default" type="button"><span class="glyphicon glyphicon-plus" /></button>
+                            <button id="trashButton" class="btn btn-default" type="button"><span class="glyphicon glyphicon-trash" /></button>
+                            <button id="addBoxButton" class="btn btn-default" data-toggle="tooltip" data-placement="top" title="" data-original-title="Add Box" type="button"><span class="glyphicon glyphicon-inbox" /></button>
+                            
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div id="workAreaBody" class="panel-body">
+                    
+                        <div data-noteid="09029323" data-boxid="123124" data-editmode="false" class="col-sm-4">
+                            <div class="panel panel-primary boxIt-common">
+                                <div class="panel-heading">
+                                    <button type="button" class="btn btn-primary btn-xs" onclick="BoxIt.Note.beginEditMode(this)"><span class="glyphicon glyphicon-edit" /></button>
+                                    Note 1</div>
+                                <div class="panel-body">
+                                    
+                                    <p>This is an Example 1</p>
+                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                                    <p>This is a Test</p>
+                                    
+                                </div>
+                            </div>
+                            <div class="panel panel-primary hide">
+                                <div class="panel-heading form-inline form-group-sm">
+                                    <button class="btn btn-primary btn-sm" onclick="BoxIt.Note.endEditMode(this)"><span class="glyphicon glyphicon-floppy-disk" /></button>
+                                    <input type="text" class="form-control" placeholder="Enter your title here" itemscope="" />
+
+                                </div>
+                                <div class="panel-body">
+                                    <textarea class="form-control" rows="5"> Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+                                    </textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="koBoxit" data-bind="template: { name : 'singleNoteTemplate', foreach: notes }">
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        
+        </div>
+    </div>
+    <script id="singleNoteTemplate" type="text/html">
+        
+        <div class="col-sm-4">
+            <div class="panel panel-primary boxIt-common" data-bind="visible : isReadMode">
+                <div class="panel-heading">
+                    <button type="button" class="btn btn-primary btn-xs" data-bind="click: onEdit">
+                        <span class="glyphicon glyphicon-edit"  /></button>
+                    <span data-bind="text: title"></span>
+                </div>
+                <div class="panel-body">
+
+                    <p data-bind="text: note"></p>
+
+                </div>
+            </div>
+            <div class="panel panel-primary" data-bind="visible : isEditMode">
+                <div class="panel-heading form-inline form-group-sm">
+                    <button class="btn btn-primary btn-sm" data-bind="click: onSave"><span class="glyphicon glyphicon-floppy-disk" /></button>
+                    <input type="text" class="form-control" placeholder="Enter your title here" data-bind="value: title" />
+
+                </div>
+                <div class="panel-body">
+                    <textarea class="form-control" rows="5" data-bind="value: note" ></textarea>
+                </div>
+            </div>
+        </div>
+
+    </script>
+    <script>
+        function boxitNoteViewModel(title,note) {
+            this.title = ko.observable(title);
+            this.note = ko.observable(note);
+            this.isEditMode = ko.observable(false);
+            //this.isReadMode = ko.computed(function() { return !this.isEditMode(); }, this);
+            this.isReadMode = ko.observable(true);
+            this.onEdit = function () {
+                this.isEditMode(true);
+                this.isReadMode(false);
+            };
+            this.onSave = function() {
+                this.isEditMode(false);
+                this.isReadMode(true);
+            };
+        }
+
+        function mainViewModel() {
+            this.owner = ko.observable("Rian");
+            this.notes = ko.observableArray(
+                [new boxitNoteViewModel("Test 1", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "),
+                    new boxitNoteViewModel("Test 2", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ")]
+            );
+            this.addNote = function() {
+
+            };
+        }
+
+        ko.applyBindings(new mainViewModel());
+    </script>
+    <script>
+        $("#addNoteButton").click(function () {
+            BoxIt.addNote($('#workAreaBody'));
+        });
+    </script>
+</body>
+</html>
