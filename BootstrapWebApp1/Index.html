@@ -9,8 +9,10 @@
     <!-- Bootstrap -->
     <link href="Content/bootstrap.min.css" rel="stylesheet">
     <link href="Content/CustomStyles.css" rel="stylesheet"/>
-    <!--<link href="Content/bootstrap-theme.min.css" rel="stylesheet">-->
-
+    <link rel="stylesheet" type="text/css" href="Content/drag.css" />
+    <!--<link href="Content/bootstrap-theme.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="fonts/font-awesome-4.2.0/css/font-awesome.min.css" />-->
+    
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -23,6 +25,8 @@
     <script src="Scripts/bootstrap.min.js"></script>
     <script src="Scripts/boxit-common.js"></script>
     <script src="Scripts/knockout-3.3.0.js"></script>
+    <script src="Scripts/snap.svg-min.js"></script>
+
 </head>
 <body>
     <nav class="navbar navbar-default" role="navigation">
@@ -57,6 +61,7 @@
         </div>
         <!-- /.container-fluid -->
     </nav>
+
     <div class="container">
         <div class="jumbotron">
             <h1>Hello, user!</h1>
@@ -70,28 +75,35 @@
                     <div class="panel-heading">
                         <span>BoxIt Work Area </span>
                         <div class="pull-right">
-                            <button id="addNoteButton" class="btn btn-default" type="button"><span class="glyphicon glyphicon-plus" /></button>
+                            <button id="addNoteButton" type="button" class="btn btn-default" data-bind="click: addNote"><span class="glyphicon glyphicon-plus" /></button>
                             <button id="trashButton" class="btn btn-default" type="button"><span class="glyphicon glyphicon-trash" /></button>
-                            <button id="addBoxButton" class="btn btn-default" data-toggle="tooltip" data-placement="top" title="" data-original-title="Add Box" type="button"><span class="glyphicon glyphicon-inbox" /></button>
+                            <button id="boxButton" class="btn btn-default" data-toggle="tooltip" data-placement="top" title="" data-original-title="Add Box" type="button"><span class="glyphicon glyphicon-inbox" /></button>
                             
                         </div>
                         <div class="clearfix"></div>
                     </div>
-                    <div id="workAreaBody" class="panel-body">
-                    
-                        <div data-noteid="09029323" data-boxid="123124" data-editmode="false" class="col-sm-4">
+                    <div id="workAreaBody" class="panel-body drag-container">
+                        <div class="col-sm-4 col-sm-push-4">
                             <div class="panel panel-primary boxIt-common">
                                 <div class="panel-heading">
                                     <button type="button" class="btn btn-primary btn-xs" onclick="BoxIt.Note.beginEditMode(this)"><span class="glyphicon glyphicon-edit" /></button>
-                                    Note 1</div>
+                                    Note 1
+                                    <div class="pull-right">
+                                        <button type="button" class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-arrow-left"></span></button>
+                                        <button type="button" class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-arrow-right"></span></button>
+                                    </div>
+                                </div>
+                                
+
                                 <div class="panel-body">
-                                    
+
                                     <p>This is an Example 1</p>
                                     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
                                     <p>This is a Test</p>
-                                    
+
                                 </div>
                             </div>
+
                             <div class="panel panel-primary hide">
                                 <div class="panel-heading form-inline form-group-sm">
                                     <button class="btn btn-primary btn-sm" onclick="BoxIt.Note.endEditMode(this)"><span class="glyphicon glyphicon-floppy-disk" /></button>
@@ -120,11 +132,17 @@
     <script id="singleNoteTemplate" type="text/html">
         
         <div class="col-sm-4">
+
             <div class="panel panel-primary boxIt-common" data-bind="visible : isReadMode">
                 <div class="panel-heading">
                     <button type="button" class="btn btn-primary btn-xs" data-bind="click: onEdit">
-                        <span class="glyphicon glyphicon-edit"  /></button>
+                        <span class="glyphicon glyphicon-edit" />
+                    </button>
                     <span data-bind="text: title"></span>
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-arrow-left"></span></button>
+                        <button type="button" class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-arrow-right"></span></button>
+                    </div>
                 </div>
                 <div class="panel-body">
 
@@ -139,17 +157,28 @@
 
                 </div>
                 <div class="panel-body">
-                    <textarea class="form-control" rows="5" data-bind="value: note" ></textarea>
+                    <textarea class="form-control" rows="5" data-bind="value: note"></textarea>
                 </div>
             </div>
+
+
         </div>
 
     </script>
+
+    <script src="Scripts/classie.js"></script>
     <script>
-        function boxitNoteViewModel(title,note) {
+        function boxitNoteViewModel(title,note,position) {
             this.title = ko.observable(title);
             this.note = ko.observable(note);
+            this.position = ko.observable(position);
             this.isEditMode = ko.observable(false);
+            this.className = ko.computed(function() {
+                var strClass = "col-sm-";
+                var colNum = 4;
+                
+                return strClass;
+            });
             //this.isReadMode = ko.computed(function() { return !this.isEditMode(); }, this);
             this.isReadMode = ko.observable(true);
             this.onEdit = function () {
@@ -165,20 +194,23 @@
         function mainViewModel() {
             this.owner = ko.observable("Rian");
             this.notes = ko.observableArray(
-                [new boxitNoteViewModel("Test 1", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "),
-                    new boxitNoteViewModel("Test 2", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ")]
+                [new boxitNoteViewModel("Test 1", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ",1),
+                    new boxitNoteViewModel("Test 2", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ",2)]
             );
-            this.addNote = function() {
-
+            this.addNote = function () {
+                var pos = notes().length + 1;
+                this.notes.push(new boxitNoteViewModel("Change Title", "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",pos));
+            };
+            this.advanceNode = function (boxitNoteViewModel) {
+                var pos = boxitNoteViewModel.position;
+                if (pos < this.notes.length) {
+                    boxitNoteViewModel.position++;
+                    this.notes[position - 1].position--;
+                }
             };
         }
 
         ko.applyBindings(new mainViewModel());
-    </script>
-    <script>
-        $("#addNoteButton").click(function () {
-            BoxIt.addNote($('#workAreaBody'));
-        });
     </script>
 </body>
 </html>
