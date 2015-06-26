@@ -66,6 +66,7 @@
         <div class="jumbotron">
             <h1>Hello, user!</h1>
             <p>This Application will blow your mind</p>
+            <p>Besides that is a simple organizer</p>
         </div>
     
         <div class="row">
@@ -83,7 +84,7 @@
                         <div class="clearfix"></div>
                     </div>
                     <div id="workAreaBody" class="panel-body drag-container">
-                        <div class="col-sm-4 col-sm-push-4">
+                        <!--<div class="col-sm-4">
                             <div class="panel panel-primary boxIt-common">
                                 <div class="panel-heading">
                                     <button type="button" class="btn btn-primary btn-xs" onclick="BoxIt.Note.beginEditMode(this)"><span class="glyphicon glyphicon-edit" /></button>
@@ -118,9 +119,9 @@
                                     </textarea>
                                 </div>
                             </div>
-                        </div>
+                        </div>-->
 
-                        <div id="koBoxit" data-bind="template: { name : 'singleNoteTemplate', foreach: notes }">
+                        <div id="koBoxit" data-bind="template: { name : 'singleNoteTemplate', foreach: orderedNotes }">
                         </div>
 
                     </div>
@@ -140,8 +141,8 @@
                     </button>
                     <span data-bind="text: title"></span>
                     <div class="pull-right">
-                        <button type="button" class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-arrow-left"></span></button>
-                        <button type="button" class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-arrow-right"></span></button>
+                        <button type="button" class="btn btn-primary btn-xs" data-bind="click: retrocedeNode"><span class="glyphicon glyphicon-arrow-left"></span></button>
+                        <button type="button" class="btn btn-primary btn-xs" data-bind="click: advanceNode"><span class="glyphicon glyphicon-arrow-right"></span></button>
                     </div>
                 </div>
                 <div class="panel-body">
@@ -168,19 +169,14 @@
 
     <script src="Scripts/classie.js"></script>
     <script>
-        function boxitNoteViewModel(title,note,position) {
+        function boxitNoteViewModel(title,note,position,parentVM) {
             this.title = ko.observable(title);
             this.note = ko.observable(note);
             this.position = ko.observable(position);
+            this.parent = ko.observable(parentVM);
             this.isEditMode = ko.observable(false);
-            this.className = ko.computed(function() {
-                var strClass = "col-sm-";
-                var colNum = 4;
-                
-                return strClass;
-            });
-            //this.isReadMode = ko.computed(function() { return !this.isEditMode(); }, this);
-            this.isReadMode = ko.observable(true);
+            this.isReadMode = ko.computed(function() { return !this.isEditMode(); }, this);
+            //this.isReadMode = ko.observable(true);
             this.onEdit = function () {
                 this.isEditMode(true);
                 this.isReadMode(false);
@@ -189,25 +185,50 @@
                 this.isEditMode(false);
                 this.isReadMode(true);
             };
+            this.advanceNode = function () {
+                var pos = this.position();
+                var parentNotes = this.parent().notes();
+                if (pos < parentNotes.length) {
+                    this.position(pos+1);
+                    var newpos = parentNotes[pos].position();
+                    parentNotes[pos].position(newpos - 1);
+                    // Refresh ordered list
+                    this.parent().notes(parentNotes);
+                }
+            };
+            this.retrocedeNode = function () {
+                var pos = this.position();
+                var parentNotes = this.parent().notes();
+                if (pos > 1) {
+                    this.position(pos-1);
+                    var newpos = parentNotes[pos - 2].position();
+                    parentNotes[pos - 2].position(newpos + 1);
+                    // Refresh ordered list
+                    this.parent().notes(parentNotes);
+                }
+            };
         }
 
         function mainViewModel() {
+            var self = this;
+            
             this.owner = ko.observable("Rian");
             this.notes = ko.observableArray(
-                [new boxitNoteViewModel("Test 1", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ",1),
-                    new boxitNoteViewModel("Test 2", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ",2)]
+                [new boxitNoteViewModel("Test 1", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ", 1, self),
+                 new boxitNoteViewModel("Test 2", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ", 2, self)]
             );
+            this.orderedNotes = ko.computed(function() {
+                return self.notes().sort(function (l, r) {
+                    var rightPos = r.position();
+                    var leftPos = l.position();
+                    return rightPos == leftPos ? 0 : (leftPos > rightPos ? -1 : 1);
+                });
+            }, this);
             this.addNote = function () {
-                var pos = notes().length + 1;
-                this.notes.push(new boxitNoteViewModel("Change Title", "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",pos));
+                var pos = self.notes().length + 1;
+                this.notes.push(new boxitNoteViewModel("Title " + pos, "Lorem ipsum dolor sit amet, consectetur adipiscing elit.", pos, self));
             };
-            this.advanceNode = function (boxitNoteViewModel) {
-                var pos = boxitNoteViewModel.position;
-                if (pos < this.notes.length) {
-                    boxitNoteViewModel.position++;
-                    this.notes[position - 1].position--;
-                }
-            };
+            
         }
 
         ko.applyBindings(new mainViewModel());
