@@ -25,8 +25,7 @@
     <script src="Scripts/bootstrap.min.js"></script>
     <script src="Scripts/boxit-common.js"></script>
     <script src="Scripts/knockout-3.3.0.js"></script>
-    <script src="Scripts/snap.svg-min.js"></script>
-
+    <script src="Scripts/knockout-sortable.js"></script>
 </head>
 <body>
     <nav class="navbar navbar-default" role="navigation">
@@ -72,13 +71,19 @@
         <div class="row">
         
             <div class="col-sm-12">
-                <div class="panel panel-default">
+                <div class="panel panel-default" data-bind="with: mainViewModel">
                     <div class="panel-heading">
                         <span>BoxIt Work Area </span>
                         <div class="pull-right">
-                            <button id="addNoteButton" type="button" class="btn btn-default" data-bind="click: addNote"><span class="glyphicon glyphicon-plus" /></button>
-                            <button id="trashButton" class="btn btn-default" type="button"><span class="glyphicon glyphicon-trash" /></button>
-                            <button id="boxButton" class="btn btn-default" data-toggle="tooltip" data-placement="top" title="" data-original-title="Add Box" type="button"><span class="glyphicon glyphicon-inbox" /></button>
+                            <button id="addNoteButton" type="button" class="btn btn-default" data-bind="click: addNote">
+                                <span class="glyphicon glyphicon-plus" />
+                            </button>
+                            <button id="trashButton" class="btn btn-default" type="button" data-bind="event: { drop: $root.removeNodeByPosition }">
+                                <span class="glyphicon glyphicon-trash" />
+                            </button>
+                            <button id="boxButton" class="btn btn-default" data-toggle="tooltip" data-placement="top" title="" data-original-title="Add Box" type="button">
+                            <span class="glyphicon glyphicon-inbox" />
+                            </button>
                             
                         </div>
                         <div class="clearfix"></div>
@@ -121,7 +126,7 @@
                             </div>
                         </div>-->
 
-                        <div id="koBoxit" data-bind="template: { name : 'singleNoteTemplate', foreach: orderedNotes }">
+                        <div id="koBoxit" data-bind="sortable: { template : 'singleNoteTemplate', data: notes }">
                         </div>
 
                     </div>
@@ -133,8 +138,9 @@
     <script id="singleNoteTemplate" type="text/html">
         
         <div class="col-sm-4">
-
-            <div class="panel panel-primary boxIt-common" data-bind="visible : isReadMode">
+            <input type="hidden" data-bind="value: position"/>
+            <div class="panel panel-primary boxIt-common" data-bind="visible : isReadMode" 
+                draggable="true" ondragstart="drag(event)" ondragend="dragend(event)">
                 <div class="panel-heading">
                     <button type="button" class="btn btn-primary btn-xs" data-bind="click: onEdit">
                         <span class="glyphicon glyphicon-edit" />
@@ -166,10 +172,43 @@
         </div>
 
     </script>
+    <script type="text/javascript">
+        // Using HTML5 native drag&drop API
+        function drag(ev) {
+            ev.dataTransfer.effectAllowed = 'move';
+            var pos = ev.target.parentElement.querySelector('input[type=hidden]').value;
+            ev.dataTransfer.setData("text", pos);
+            elementDragged = ev.target;
+        }
 
-    <script src="Scripts/classie.js"></script>
+        function dragend(ev) {
+            elementDragged = null;
+        };
+        
+        trashButton.addEventListener('dragover', function(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+
+            e.dataTransfer.dropEffect = 'move';
+
+            return false;
+        });
+        //trashButton.addEventListener('drop', function (e) {
+        //    if (e.preventDefault) e.preventDefault();
+        //    if (e.stopPropagation) e.stopPropagation();
+
+        //    var pos = e.dataTransfer.getData("text");
+            
+        //    // Remove the element from the list.
+        //    //document.getElementById('koBoxit').removeChild(elementDragged);
+        //    elementDragged.parentElement.removeChild(elementDragged);
+        //    mainViewModel.removeNodeByPosition(pos);
+        //    return false;
+        //});
+    </script>
     <script>
-        function boxitNoteViewModel(title,note,position,parentVM) {
+        function boxitNoteViewModel(title,note,position, parentVM) {
             this.title = ko.observable(title);
             this.note = ko.observable(note);
             this.position = ko.observable(position);
@@ -179,11 +218,11 @@
             //this.isReadMode = ko.observable(true);
             this.onEdit = function () {
                 this.isEditMode(true);
-                this.isReadMode(false);
+                //this.isReadMode(false);
             };
             this.onSave = function() {
                 this.isEditMode(false);
-                this.isReadMode(true);
+                //this.isReadMode(true);
             };
             this.advanceNode = function () {
                 var pos = this.position();
@@ -193,7 +232,7 @@
                     var newpos = parentNotes[pos].position();
                     parentNotes[pos].position(newpos - 1);
                     // Refresh ordered list
-                    this.parent().notes(parentNotes);
+                    this.parent().orderNotes();
                 }
             };
             this.retrocedeNode = function () {
@@ -204,7 +243,7 @@
                     var newpos = parentNotes[pos - 2].position();
                     parentNotes[pos - 2].position(newpos + 1);
                     // Refresh ordered list
-                    this.parent().notes(parentNotes);
+                    this.parent().orderNotes();
                 }
             };
         }
@@ -217,18 +256,27 @@
                 [new boxitNoteViewModel("Test 1", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ", 1, self),
                  new boxitNoteViewModel("Test 2", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ", 2, self)]
             );
-            this.orderedNotes = ko.computed(function() {
-                return self.notes().sort(function (l, r) {
-                    var rightPos = r.position();
-                    var leftPos = l.position();
-                    return rightPos == leftPos ? 0 : (leftPos > rightPos ? -1 : 1);
-                });
-            }, this);
+            
             this.addNote = function () {
                 var pos = self.notes().length + 1;
                 this.notes.push(new boxitNoteViewModel("Title " + pos, "Lorem ipsum dolor sit amet, consectetur adipiscing elit.", pos, self));
             };
-            
+            this.removeNodeByPosition = function (data, event) {
+                if (!event) { return false; }
+                
+                var position = event.dataTransfer.getData("text");
+                this.notes.remove(function (item) { return item.position == position; });
+            };
+            this.orderNotes = function () {
+                var tempNotes = self.notes();
+                tempNotes.sort(function (l, r) {
+                    var rightPos = r.position();
+                    var leftPos = l.position();
+                    //return rightPos == leftPos ? 0 : (leftPos > rightPos ? -1 : 1);
+                    return leftPos - rightPos;
+                });
+                this.notes(tempNotes);
+            };
         }
 
         ko.applyBindings(new mainViewModel());
