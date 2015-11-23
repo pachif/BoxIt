@@ -19,13 +19,7 @@
 	  <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.2/html5shiv.js"></script>
 	  <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="Scripts/jquery-1.9.1.min.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="Scripts/bootstrap.min.js"></script>
-    <script src="Scripts/boxit-common.js"></script>
-    <script src="Scripts/knockout-3.3.0.js"></script>
-    <script src="Scripts/knockout-sortable.js"></script>
+    
 </head>
 <body>
     <nav class="navbar navbar-default" role="navigation">
@@ -43,13 +37,22 @@
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
-                    <li class="active"><a href="#">Your Boxes</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Your Boxes<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#">Box 1</a></li>
+                            <li><a href="#">Box 2</a></li>
+                            <li><a href="#">Box X</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#" data-toggle="modal" data-target="#addBoxModal">Add New Box</a></li>
                     <li><a href="#">Save</a></li>
+                    <li><a href="#">Restore</a></li>
                 </ul>
                 <div class="nav navbar-nav navbar-right">
                     <form class="navbar-form navbar-left" role="search">
                         <div class="form-group">
-                            <input type="text" class="form-control" placeholder="Search">
+                            <input type="text" class="form-control" placeholder="search in your boxes">
                         </div>
                         <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
                     </form>
@@ -62,18 +65,18 @@
     </nav>
 
     <div class="container">
-        <div class="jumbotron">
-            <h1>Hello, user!</h1>
-            <p>This Application will blow your mind</p>
-            <p>Besides that is a simple organizer</p>
+        <div class="jumbotron hidden-xs">
+            <h1>Hello, 'Guest' user!</h1>
+            <p>The goal of this application is to keep stuff organized, it is a simple application you will enjoy!</p>
+            <p class="text-muted">This will blow your mind</p>
         </div>
     
         <div class="row">
         
             <div class="col-sm-12">
-                <div class="panel panel-default" data-bind="with: mainViewModel">
+                <div class="panel panel-default" data-bind="with: boxViewModel">
                     <div class="panel-heading">
-                        <span>BoxIt Work Area </span>
+                        <span>BoxIt Name of the Box </span>
                         <div class="pull-right">
                             <button id="addNoteButton" type="button" class="btn btn-default" data-bind="click: addNote">
                                 <span class="glyphicon glyphicon-plus" />
@@ -81,7 +84,7 @@
                             <button id="trashButton" class="btn btn-default" type="button" data-bind="event: { drop: $root.removeNodeByPosition }">
                                 <span class="glyphicon glyphicon-trash" />
                             </button>
-                            <button id="boxButton" class="btn btn-default" data-toggle="tooltip" data-placement="top" title="" data-original-title="Add Box" type="button">
+                            <button id="boxButton" type="button" class="btn btn-default" data-toggle="tooltip" data-placement="top" title="" data-original-title="Box" >
                             <span class="glyphicon glyphicon-inbox" />
                             </button>
                             
@@ -134,7 +137,28 @@
             </div>
         
         </div>
+
     </div>
+
+    <div class="modal fade" id="addBoxModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Box Dialog</h4>
+                </div>
+                <div class="modal-body">
+                    <p>Name of the Box:</p>
+                    <input type="text" id="boxNameInput" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="javascript: addBox();">Add</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script id="singleNoteTemplate" type="text/html">
         
         <div class="col-sm-4">
@@ -172,8 +196,19 @@
         </div>
 
     </script>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="Scripts/jquery-1.9.1.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="Scripts/bootstrap.min.js"></script>
+
+    <script src="Scripts/jquery-ui.js"></script>
+    <script src="Scripts/knockout-3.3.0.js"></script>
+    <script src="Scripts/knockout-sortable.js"></script>
+
+    <!-- Using HTML5 native drag&drop API -->
     <script type="text/javascript">
-        // Using HTML5 native drag&drop API
+        //
         function drag(ev) {
             ev.dataTransfer.effectAllowed = 'move';
             var pos = ev.target.parentElement.querySelector('input[type=hidden]').value;
@@ -185,7 +220,7 @@
             elementDragged = null;
         };
         
-        trashButton.addEventListener('dragover', function(e) {
+        trashButton.addEventListener('dragover', function (e) {
             if (e.preventDefault) {
                 e.preventDefault();
             }
@@ -194,92 +229,40 @@
 
             return false;
         });
-        //trashButton.addEventListener('drop', function (e) {
-        //    if (e.preventDefault) e.preventDefault();
-        //    if (e.stopPropagation) e.stopPropagation();
 
-        //    var pos = e.dataTransfer.getData("text");
+        function addBox() {
+            var boxName = $('#boxNameInput').val();
+            if (boxName != null && boxName.length>0) {
+                alert('Call MainVM code!\nparameter: ' + boxName);
+            }
+            window.location.reload(true);
+        }
+
+        $('#addBoxModal').on('show.bs.modal', function () {
+            $('#boxNameInput').focus();
+        })
+        /*
+        trashButton.addEventListener('drop', function (e) {
+            if (e.preventDefault) e.preventDefault();
+            if (e.stopPropagation) e.stopPropagation();
+
+            var pos = e.dataTransfer.getData("text");
             
-        //    // Remove the element from the list.
-        //    //document.getElementById('koBoxit').removeChild(elementDragged);
-        //    elementDragged.parentElement.removeChild(elementDragged);
-        //    mainViewModel.removeNodeByPosition(pos);
-        //    return false;
-        //});
+            // Remove the element from the list.
+            //document.getElementById('koBoxit').removeChild(elementDragged);
+            elementDragged.parentElement.removeChild(elementDragged);
+            mainViewModel.removeNodeByPosition(pos);
+            return false;
+        });*/
     </script>
+    <script src="Scripts/boxit-note.js"></script>
+    <script src="Scripts/boxit-main.js"></script>
     <script>
-        function boxitNoteViewModel(title,note,position, parentVM) {
-            this.title = ko.observable(title);
-            this.note = ko.observable(note);
-            this.position = ko.observable(position);
-            this.parent = ko.observable(parentVM);
-            this.isEditMode = ko.observable(false);
-            this.isReadMode = ko.computed(function() { return !this.isEditMode(); }, this);
-            //this.isReadMode = ko.observable(true);
-            this.onEdit = function () {
-                this.isEditMode(true);
-                //this.isReadMode(false);
-            };
-            this.onSave = function() {
-                this.isEditMode(false);
-                //this.isReadMode(true);
-            };
-            this.advanceNode = function () {
-                var pos = this.position();
-                var parentNotes = this.parent().notes();
-                if (pos < parentNotes.length) {
-                    this.position(pos+1);
-                    var newpos = parentNotes[pos].position();
-                    parentNotes[pos].position(newpos - 1);
-                    // Refresh ordered list
-                    this.parent().orderNotes();
-                }
-            };
-            this.retrocedeNode = function () {
-                var pos = this.position();
-                var parentNotes = this.parent().notes();
-                if (pos > 1) {
-                    this.position(pos-1);
-                    var newpos = parentNotes[pos - 2].position();
-                    parentNotes[pos - 2].position(newpos + 1);
-                    // Refresh ordered list
-                    this.parent().orderNotes();
-                }
-            };
-        }
-
-        function mainViewModel() {
-            var self = this;
-            
-            this.owner = ko.observable("Rian");
-            this.notes = ko.observableArray(
-                [new boxitNoteViewModel("Test 1", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ", 1, self),
-                 new boxitNoteViewModel("Test 2", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ", 2, self)]
-            );
-            
-            this.addNote = function () {
-                var pos = self.notes().length + 1;
-                this.notes.push(new boxitNoteViewModel("Title " + pos, "Lorem ipsum dolor sit amet, consectetur adipiscing elit.", pos, self));
-            };
-            this.removeNodeByPosition = function (data, event) {
-                if (!event) { return false; }
-                
-                var position = event.dataTransfer.getData("text");
-                this.notes.remove(function (item) { return item.position == position; });
-            };
-            this.orderNotes = function () {
-                var tempNotes = self.notes();
-                tempNotes.sort(function (l, r) {
-                    var rightPos = r.position();
-                    var leftPos = l.position();
-                    //return rightPos == leftPos ? 0 : (leftPos > rightPos ? -1 : 1);
-                    return leftPos - rightPos;
-                });
-                this.notes(tempNotes);
-            };
-        }
-
-        ko.applyBindings(new mainViewModel());
+        $(document).ready(function () {
+            var userName = "Guest";
+            ko.applyBindings(new mainViewModel(userName));
+        });
+        
     </script>
 </body>
 </html>
