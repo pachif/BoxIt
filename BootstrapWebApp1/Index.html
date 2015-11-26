@@ -10,6 +10,7 @@
     <link href="Content/bootstrap.min.css" rel="stylesheet">
     <link href="Content/CustomStyles.css" rel="stylesheet"/>
     <link rel="stylesheet" type="text/css" href="Content/drag.css" />
+    <link href="Content/jquery-ui.min.css" rel="stylesheet" />
     <!--<link href="Content/bootstrap-theme.min.css" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="fonts/font-awesome-4.2.0/css/font-awesome.min.css" />-->
     
@@ -81,9 +82,7 @@
                             <button id="addNoteButton" type="button" class="btn btn-default" data-bind="click: addNote">
                                 <span class="glyphicon glyphicon-plus" />
                             </button>
-                            <button id="trashButton" class="btn btn-default" type="button" data-bind="event: { drop: $root.removeNodeByPosition }">
-                                <span class="glyphicon glyphicon-trash" />
-                            </button>
+                            
                             <button id="boxButton" type="button" class="btn btn-default" data-toggle="tooltip" data-placement="top" title="" data-original-title="Box" >
                             <span class="glyphicon glyphicon-inbox" />
                             </button>
@@ -129,7 +128,7 @@
                             </div>
                         </div>-->
 
-                        <div id="koBoxit" data-bind="sortable: { template : 'singleNoteTemplate', data: notes }">
+                        <div id="koBoxit" data-bind="sortable: { template : 'singleNoteTemplate', data: notes, afterMove : afterDropCallBack }">
                         </div>
 
                     </div>
@@ -163,16 +162,14 @@
         
         <div class="col-sm-4">
             <input type="hidden" data-bind="value: position"/>
-            <div class="panel panel-primary boxIt-common" data-bind="visible : isReadMode" 
-                draggable="true" ondragstart="drag(event)" ondragend="dragend(event)">
+            <div class="panel panel-primary boxIt-common" data-bind="visible : isReadMode">
                 <div class="panel-heading">
                     <button type="button" class="btn btn-primary btn-xs" data-bind="click: onEdit">
                         <span class="glyphicon glyphicon-edit" />
                     </button>
                     <span data-bind="text: title"></span>
                     <div class="pull-right">
-                        <button type="button" class="btn btn-primary btn-xs" data-bind="click: retrocedeNode"><span class="glyphicon glyphicon-arrow-left"></span></button>
-                        <button type="button" class="btn btn-primary btn-xs" data-bind="click: advanceNode"><span class="glyphicon glyphicon-arrow-right"></span></button>
+                        <button type="button" class="btn btn-primary btn-xs" data-bind="click: removeNote"><span class="glyphicon glyphicon-trash"></span></button>
                     </div>
                 </div>
                 <div class="panel-body">
@@ -206,33 +203,32 @@
     <script src="Scripts/knockout-3.3.0.js"></script>
     <script src="Scripts/knockout-sortable.js"></script>
 
-    <!-- Using HTML5 native drag&drop API -->
+    <!-- Using JQuery UI Drag & Drop -->
     <script type="text/javascript">
-        //
-        function drag(ev) {
-            ev.dataTransfer.effectAllowed = 'move';
-            var pos = ev.target.parentElement.querySelector('input[type=hidden]').value;
-            ev.dataTransfer.setData("text", pos);
-            elementDragged = ev.target;
-        }
+        //$(".boxIt-common").draggable({
+        //    revert: "invalid",
+        //    helper: "clone",
+        //    cursor: "move",
+        //    stop: function (event, ui) {
+        //        alert('Drag Stop!');
+        //    }
+        //});
 
-        function dragend(ev) {
-            elementDragged = null;
-        };
-        
-        trashButton.addEventListener('dragover', function (e) {
-            if (e.preventDefault) {
-                e.preventDefault();
-            }
+        //$("#trashButton").droppable({
+        //    drop: function (event, ui) {
+        //        alert('Dropped!');
+        //    }
+        //});
 
-            e.dataTransfer.dropEffect = 'move';
+    </script>
 
-            return false;
-        });
-
+    <script src="Scripts/boxit-note.js"></script>
+    <script src="Scripts/boxit-main.js"></script>
+    <!-- General Initialization -->
+    <script>
         function addBox() {
             var boxName = $('#boxNameInput').val();
-            if (boxName != null && boxName.length>0) {
+            if (boxName != null && boxName.length > 0) {
                 alert('Call MainVM code!\nparameter: ' + boxName);
             }
             window.location.reload(true);
@@ -240,25 +236,10 @@
 
         $('#addBoxModal').on('show.bs.modal', function () {
             $('#boxNameInput').focus();
-        })
-        /*
-        trashButton.addEventListener('drop', function (e) {
-            if (e.preventDefault) e.preventDefault();
-            if (e.stopPropagation) e.stopPropagation();
+        });
 
-            var pos = e.dataTransfer.getData("text");
-            
-            // Remove the element from the list.
-            //document.getElementById('koBoxit').removeChild(elementDragged);
-            elementDragged.parentElement.removeChild(elementDragged);
-            mainViewModel.removeNodeByPosition(pos);
-            return false;
-        });*/
-    </script>
-    <script src="Scripts/boxit-note.js"></script>
-    <script src="Scripts/boxit-main.js"></script>
-    <script>
         $(document).ready(function () {
+
             var userName = "Guest";
             ko.applyBindings(new mainViewModel(userName));
         });

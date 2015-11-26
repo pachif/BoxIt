@@ -36,6 +36,20 @@ function boxViewModel(id, user, name) {
         });
         this.notes(tempNotes);
     };
+    this.afterDropCallBack = function (arg) {
+
+        //alert('Moved from item: ' + arg.sourceIndex + ' to target index: ' + arg.targetIndex);
+        // change note position info
+        var sourcePos = arg.item.position();
+        // find the target note in the box
+        var targetNote = ko.utils.arrayFirst(self.notes(), function (item) {
+            // TODO: improve this to obtain the target item
+            return item.position() === arg.targetIndex + 1;
+        });
+
+        arg.item.position(targetNote.position());
+        targetNote.position(sourcePos);
+    };
 }
 
 function mainViewModel(userName) {
@@ -69,6 +83,7 @@ function mainViewModel(userName) {
 
         this.boxes.push(box);
     };
+    
     this.removeBox = function (boxId) {
         this.boxes.remove(function (box) { return box.id == boxId; });
     };

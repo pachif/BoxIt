@@ -1,6 +1,8 @@
 ﻿/// <reference path="knockout-3.3.0.js" />
 
 function boxitNoteViewModel(title, note, position, parentVM) {
+    var self = this;
+
     this.title = ko.observable(title);
     this.note = ko.observable(note);
     this.position = ko.observable(position);
@@ -15,6 +17,9 @@ function boxitNoteViewModel(title, note, position, parentVM) {
     this.onSave = function () {
         this.isEditMode(false);
         //this.isReadMode(true);
+    };
+    this.removeNote = function () {
+        self.parent().notes.remove(function (item) { return item.position() == position; });
     };
     this.advanceNode = function () {
         var pos = this.position();
