@@ -20,12 +20,7 @@ function boxViewModel(id, user, name) {
         var pos = self.notes().length + 1;
         this.notes.push(new boxitNoteViewModel("Title " + pos, "Lorem ipsum dolor sit amet, consectetur adipiscing elit.", pos, self));
     };
-    this.removeNodeByPosition = function (data, event) {
-        if (!event) { return false; }
-
-        var position = event.dataTransfer.getData("text");
-        this.notes.remove(function (item) { return item.position == position; });
-    };
+    
     this.orderNotes = function () {
         var tempNotes = self.notes();
         tempNotes.sort(function (l, r) {
@@ -44,9 +39,10 @@ function boxViewModel(id, user, name) {
         // find the target note in the box
         var targetNote = ko.utils.arrayFirst(self.notes(), function (item) {
             // TODO: improve this to obtain the target item
-            return item.position() === arg.targetIndex + 1;
+            return item.position() == arg.targetIndex + 1;
         });
 
+        alert('Moving from: ' + sourcePos + ' to position: ' + targetNote.position());
         arg.item.position(targetNote.position());
         targetNote.position(sourcePos);
     };
@@ -60,11 +56,12 @@ function mainViewModel(userName) {
 
     this.name = ko.observable(userName);
     this.boxes = ko.observableArray();
+    this.currentBox = ko.observable();
     this.addBox = function (nameParam) {
         // calculate new id
         var arrayIds = [];
-        for (var i = 0; i < this.boxes.length; i++) {
-            var boxVM = this.boxes[i];
+        for (var i = 0; i < self.boxes.length; i++) {
+            var boxVM = self.boxes[i];
             arrayIds.push(boxVM.boxId);
         }
         var matched = true;
@@ -77,13 +74,16 @@ function mainViewModel(userName) {
             }
         }
        
-        // initialization code
-        var box = new boxViewModel(candidateId, this.name, nameParam);
+        // initialization code for the added box
+        var box = new boxViewModel(candidateId, self.name, nameParam);
         box.addNote();
 
-        this.boxes.push(box);
+        self.boxes.push(box);
+        self.currentBox(box);
     };
-    
+    this.setCurrentBox = function(boxVM) {
+        self.currentBox(boxVM);
+    };
     this.removeBox = function (boxId) {
         this.boxes.remove(function (box) { return box.id == boxId; });
     };
@@ -91,4 +91,6 @@ function mainViewModel(userName) {
         // use the user name to restore from local storage and do a full refresh if neccessary
 
     };
+
+    this.addBox('This is Box Title');
 }

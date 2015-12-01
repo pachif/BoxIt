@@ -40,10 +40,8 @@
                 <ul class="nav navbar-nav">
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Your Boxes<span class="caret"></span></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="#">Box 1</a></li>
-                            <li><a href="#">Box 2</a></li>
-                            <li><a href="#">Box X</a></li>
+                        <ul data-bind="foreach: boxes" class="dropdown-menu">
+                            <li> <a data-bind="text: boxName, click: $root.setCurrentBox"></a></li>
                         </ul>
                     </li>
                     <li><a href="#" data-toggle="modal" data-target="#addBoxModal">Add New Box</a></li>
@@ -75,18 +73,16 @@
         <div class="row">
         
             <div class="col-sm-12">
-                <div class="panel panel-default" data-bind="with: boxViewModel">
+                <div class="panel panel-default" data-bind="with: currentBox">
                     <div class="panel-heading">
-                        <span>BoxIt Name of the Box </span>
+                        <span data-bind="text: boxName"></span>
                         <div class="pull-right">
-                            <button id="addNoteButton" type="button" class="btn btn-default" data-bind="click: addNote">
+                            <button id="addNoteButton" type="button" class="btn btn-xs btn-default" data-bind="click: addNote">
                                 <span class="glyphicon glyphicon-plus" />
                             </button>
-                            
-                            <button id="boxButton" type="button" class="btn btn-default" data-toggle="tooltip" data-placement="top" title="" data-original-title="Box" >
-                            <span class="glyphicon glyphicon-inbox" />
+                            <button class="btn btn-xs btn-default">
+                                <span class="glyphicon glyphicon-inbox" />
                             </button>
-                            
                         </div>
                         <div class="clearfix"></div>
                     </div>
@@ -148,10 +144,10 @@
                 </div>
                 <div class="modal-body">
                     <p>Name of the Box:</p>
-                    <input type="text" id="boxNameInput" />
+                    <input type="text" class="form-control" id="boxNameInput" />
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="javascript: addBox();">Add</button>
+                    <button id="addBoxDialogButton" type="button" class="btn btn-primary">Add</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -203,36 +199,23 @@
     <script src="Scripts/knockout-3.3.0.js"></script>
     <script src="Scripts/knockout-sortable.js"></script>
 
-    <!-- Using JQuery UI Drag & Drop -->
-    <script type="text/javascript">
-        //$(".boxIt-common").draggable({
-        //    revert: "invalid",
-        //    helper: "clone",
-        //    cursor: "move",
-        //    stop: function (event, ui) {
-        //        alert('Drag Stop!');
-        //    }
-        //});
-
-        //$("#trashButton").droppable({
-        //    drop: function (event, ui) {
-        //        alert('Dropped!');
-        //    }
-        //});
-
-    </script>
-
     <script src="Scripts/boxit-note.js"></script>
     <script src="Scripts/boxit-main.js"></script>
     <!-- General Initialization -->
     <script>
-        function addBox() {
+
+        $('#addBoxDialogButton').on('click', function (e) {
+            var vm = ko.contextFor(e.target).$data;
+
             var boxName = $('#boxNameInput').val();
             if (boxName != null && boxName.length > 0) {
-                alert('Call MainVM code!\nparameter: ' + boxName);
+                vm.addBox(boxName);
             }
-            window.location.reload(true);
-        }
+
+            $('#addBoxModal').modal('hide');
+            $('#boxNameInput').val('');
+        });
+
 
         $('#addBoxModal').on('show.bs.modal', function () {
             $('#boxNameInput').focus();
