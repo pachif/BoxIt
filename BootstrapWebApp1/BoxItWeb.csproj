@@ -19,6 +19,7 @@
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
+    <UseGlobalApplicationHostFile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -61,10 +62,8 @@
     <Content Include="Content\bootstrap-theme.min.css" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
-    <Content Include="Content\collapseexpand.css" />
     <Content Include="Content\CustomStyles.css" />
-    <Content Include="Content\demo.css" />
-    <Content Include="Content\drag.css" />
+    <Content Include="Content\icons.css" />
     <Content Include="Content\normalize.css" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Icon.png" />
@@ -81,7 +80,7 @@
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Scripts\boxit-common.js" />
-    <Content Include="Scripts\classie.js" />
+    <Content Include="Scripts\dragdrop.js" />
     <Content Include="Scripts\draggabilly.pkgd.min.js" />
     <Content Include="Scripts\jquery-1.9.1.js" />
     <Content Include="Scripts\jquery-1.9.1.min.js" />
@@ -89,9 +88,7 @@
     <Content Include="Scripts\knockout-3.3.0.js" />
     <Content Include="Scripts\modernizr.custom.js" />
     <Content Include="Scripts\npm.js" />
-    <Content Include="Scripts\snap.svg-min.js" />
-    <Content Include="Scripts\SVGCollapser.js" />
-    <Content Include="Scripts\SVGDraggable.js" />
+    <Content Include="Test.html" />
     <Content Include="Web.config" />
     <Content Include="Scripts\jquery-1.9.1.min.map" />
   </ItemGroup>
