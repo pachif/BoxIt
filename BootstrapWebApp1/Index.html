@@ -10,7 +10,7 @@
     <link href="Content/bootstrap.min.css" rel="stylesheet">
     <link href="Content/CustomStyles.css" rel="stylesheet"/>
     <link rel="stylesheet" type="text/css" href="Content/drag.css" />
-    <link href="Content/icons.css" rel="stylesheet" />
+    <link href="Content/jquery-ui.min.css" rel="stylesheet" />
     <!--<link href="Content/bootstrap-theme.min.css" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="fonts/font-awesome-4.2.0/css/font-awesome.min.css" />-->
     
@@ -20,12 +20,7 @@
 	  <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.2/html5shiv.js"></script>
 	  <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="Scripts/jquery-1.9.1.min.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="Scripts/bootstrap.min.js"></script>
-    <script src="Scripts/knockout-3.3.0.js"></script>
-    <script src="Scripts/modernizr.custom.js"></script>
+    
 </head>
 <body>
     <nav class="navbar navbar-default" role="navigation">
@@ -43,13 +38,20 @@
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
-                    <li class="active"><a href="#">Your Boxes</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Your Boxes<span class="caret"></span></a>
+                        <ul data-bind="foreach: boxes" class="dropdown-menu">
+                            <li> <a data-bind="text: boxName, click: $root.setCurrentBox"></a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#" data-toggle="modal" data-target="#addBoxModal">Add New Box</a></li>
                     <li><a href="#">Save</a></li>
+                    <li><a href="#">Restore</a></li>
                 </ul>
                 <div class="nav navbar-nav navbar-right">
                     <form class="navbar-form navbar-left" role="search">
                         <div class="form-group">
-                            <input type="text" class="form-control" placeholder="Search">
+                            <input type="text" class="form-control" placeholder="search in your boxes">
                         </div>
                         <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
                     </form>
@@ -62,21 +64,25 @@
     </nav>
 
     <div class="container">
-        <div class="jumbotron">
-            <h1>Hello, user!</h1>
-            <p>This Application will blow your mind</p>
-            <p>Besides that is a simple organizer</p>
+        <div class="jumbotron hidden-xs">
+            <h1>Hello, 'Guest' user!</h1>
+            <p>The goal of this application is to keep stuff organized, it is a simple application you will enjoy!</p>
+            <p class="text-muted">This will blow your mind</p>
         </div>
     
         <div class="row">
         
             <div class="col-sm-12">
-                <div class="panel panel-default">
+                <div class="panel panel-default" data-bind="with: currentBox">
                     <div class="panel-heading">
-                        <span>BoxIt Work Area </span>
+                        <span data-bind="text: boxName"></span>
                         <div class="pull-right">
-                            <button id="addNoteButton" type="button" class="btn btn-default" data-bind="click: addNote"><span class="glyphicon glyphicon-plus" /></button>
-                            <button id="boxButton" class="btn btn-default" data-toggle="tooltip" data-placement="top" title="" data-original-title="Add Box" type="button"><span class="glyphicon glyphicon-inbox" /></button>
+                            <button id="addNoteButton" type="button" class="btn btn-xs btn-default" data-bind="click: addNote">
+                                <span class="glyphicon glyphicon-plus" />
+                            </button>
+                            <button class="btn btn-xs btn-default">
+                                <span class="glyphicon glyphicon-inbox" />
+                            </button>
                         </div>
                         <div class="clearfix"></div>
                     </div>
@@ -118,33 +124,48 @@
                             </div>
                         </div>-->
 
-                        <div id="koBoxit" class="grid clearfix" data-bind="template: { name : 'singleNoteTemplate', foreach: orderedNotes }">
+                        <div id="koBoxit" data-bind="sortable: { template : 'singleNoteTemplate', data: notes, afterMove : afterDropCallBack }">
                         </div>
 
                     </div>
                 </div>
             </div>
         
-           
-            <div id="drop-area" class="drop-area">
-                <div class="drop-area__item"><span class="glyphicon glyphicon-trash"></span></div>
-                <div class="drop-area__item"><span class="glyphicon glyphicon-floppy-save"></span></div>
+        </div>
+
+    </div>
+
+    <div class="modal fade" id="addBoxModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Box Dialog</h4>
+                </div>
+                <div class="modal-body">
+                    <p>Name of the Box:</p>
+                    <input type="text" class="form-control" id="boxNameInput" />
+                </div>
+                <div class="modal-footer">
+                    <button id="addBoxDialogButton" type="button" class="btn btn-primary">Add</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
+
     <script id="singleNoteTemplate" type="text/html">
         
         <div class="col-sm-4">
-
-            <div class="panel panel-primary boxIt-common " data-bind="visible : isReadMode">
-                <div class="panel-heading ">
+            <input type="hidden" data-bind="value: position"/>
+            <div class="panel panel-primary boxIt-common" data-bind="visible : isReadMode">
+                <div class="panel-heading">
                     <button type="button" class="btn btn-primary btn-xs" data-bind="click: onEdit">
                         <span class="glyphicon glyphicon-edit" />
                     </button>
                     <span data-bind="text: title"></span>
-                    <div class="pull-right drag-me">
-                        <button type="button" class="btn btn-primary btn-xs "><span class="glyphicon glyphicon-move"></span></button>
-                        
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-primary btn-xs" data-bind="click: removeNote"><span class="glyphicon glyphicon-trash"></span></button>
                     </div>
                 </div>
                 <div class="panel-body">
@@ -169,131 +190,43 @@
 
     </script>
 
-    <!--<script src="Scripts/classie.js"></script>-->
-    <script src="Scripts/draggabilly.pkgd.min.js"></script>
-    <script src="Scripts/dragdrop.js"></script>
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="Scripts/jquery-1.9.1.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="Scripts/bootstrap.min.js"></script>
 
+    <script src="Scripts/jquery-ui.js"></script>
+    <script src="Scripts/knockout-3.3.0.js"></script>
+    <script src="Scripts/knockout-sortable.js"></script>
+
+    <script src="Scripts/boxit-note.js"></script>
+    <script src="Scripts/boxit-main.js"></script>
+    <!-- General Initialization -->
     <script>
-        function boxitNoteViewModel(title,note,position,parentVM) {
-            this.title = ko.observable(title);
-            this.note = ko.observable(note);
-            this.position = ko.observable(position);
-            this.parent = ko.observable(parentVM);
-            this.isEditMode = ko.observable(false);
-            this.isReadMode = ko.computed(function() { return !this.isEditMode(); }, this);
-            //this.isReadMode = ko.observable(true);
-            this.onEdit = function () {
-                this.isEditMode(true);
-                this.isReadMode(false);
-            };
-            this.onSave = function() {
-                this.isEditMode(false);
-                this.isReadMode(true);
-            };
-            this.advanceNode = function () {
-                var pos = this.position();
-                var parentNotes = this.parent().notes();
-                if (pos < parentNotes.length) {
-                    this.position(pos+1);
-                    var newpos = parentNotes[pos].position();
-                    parentNotes[pos].position(newpos - 1);
-                    // Refresh ordered list
-                    this.parent().notes(parentNotes);
-                }
-            };
-            this.retrocedeNode = function () {
-                var pos = this.position();
-                var parentNotes = this.parent().notes();
-                if (pos > 1) {
-                    this.position(pos-1);
-                    var newpos = parentNotes[pos - 2].position();
-                    parentNotes[pos - 2].position(newpos + 1);
-                    // Refresh ordered list
-                    this.parent().notes(parentNotes);
-                }
-            };
-        }
 
-        function mainViewModel() {
-            var self = this;
-            
-            this.owner = ko.observable("Rian");
-            this.notes = ko.observableArray(
-                [new boxitNoteViewModel("Test 1", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ", 1, self),
-                 new boxitNoteViewModel("Test 2", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ", 2, self)]
-            );
-            this.orderedNotes = ko.computed(function() {
-                return self.notes().sort(function (l, r) {
-                    var rightPos = r.position();
-                    var leftPos = l.position();
-                    return rightPos == leftPos ? 0 : (leftPos > rightPos ? -1 : 1);
-                });
-            }, this);
-            this.addNote = function () {
-                var pos = self.notes().length + 1;
-                this.notes.push(new boxitNoteViewModel("Title " + pos, "Lorem ipsum dolor sit amet, consectetur adipiscing elit.", pos, self));
-            };
-            
-        }
+        $('#addBoxDialogButton').on('click', function (e) {
+            var vm = ko.contextFor(e.target).$data;
 
-        ko.applyBindings(new mainViewModel());
+            var boxName = $('#boxNameInput').val();
+            if (boxName != null && boxName.length > 0) {
+                vm.addBox(boxName);
+            }
+
+            $('#addBoxModal').modal('hide');
+            $('#boxNameInput').val('');
+        });
+
+
+        $('#addBoxModal').on('show.bs.modal', function () {
+            $('#boxNameInput').focus();
+        });
+
+        $(document).ready(function () {
+
+            var userName = "Guest";
+            ko.applyBindings(new mainViewModel(userName));
+        });
+        
     </script>
-    <script>
-			(function() {
-				var body = document.body,
-					dropArea = document.getElementById( 'drop-area' ),
-					droppableArr = [], dropAreaTimeout;
-
-				// initialize droppables
-				[].slice.call( document.querySelectorAll( '#drop-area .drop-area__item' )).forEach( function( el ) {
-					droppableArr.push( new Droppable( el, {
-						onDrop : function( instance, draggableEl ) {
-							// show checkmark inside the droppabe element
-							classie.add( instance.el, 'drop-feedback' );
-							clearTimeout( instance.checkmarkTimeout );
-							instance.checkmarkTimeout = setTimeout( function() {
-								classie.remove( instance.el, 'drop-feedback' );
-							}, 800 );
-							// ...
-						}
-					} ) );
-				} );
-
-				// initialize draggable(s)
-				[].slice.call(document.querySelectorAll('#koBoxit .drag-me')).forEach(function (el) {
-					new Draggable( el, droppableArr, {
-						draggabilly : { containment: document.body },
-						onStart : function() {
-							// add class 'drag-active' to body
-							classie.add( body, 'drag-active' );
-							// clear timeout: dropAreaTimeout (toggle drop area)
-							clearTimeout( dropAreaTimeout );
-							// show dropArea
-							classie.add( dropArea, 'show' );
-						},
-						onEnd : function( wasDropped ) {
-							var afterDropFn = function() {
-								// hide dropArea
-								classie.remove( dropArea, 'show' );
-								// remove class 'drag-active' from body
-								classie.remove( body, 'drag-active' );
-							};
-
-							if (!wasDropped) {
-							    alert('Well Done');
-								afterDropFn();
-							}
-							else {
-							    
-								// after some time hide drop area and remove class 'drag-active' from body
-								clearTimeout( dropAreaTimeout );
-								dropAreaTimeout = setTimeout( afterDropFn, 400 );
-							}
-						}
-					} );
-				} );
-			})();
-    </script>
-
 </body>
 </html>
