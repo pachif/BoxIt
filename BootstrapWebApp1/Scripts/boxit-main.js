@@ -16,11 +16,13 @@ function boxViewModel(id, user, name) {
     this.owner = ko.observable(user);
     this.notes = ko.observableArray();
 
-    this.addNote = function () {
+    this.addMockUpNote = function () {
         var pos = self.notes().length + 1;
         this.notes.push(new boxitNoteViewModel("Title " + pos, "Lorem ipsum dolor sit amet, consectetur adipiscing elit.", pos, self));
     };
-    
+    this.addNote = function (title, descr, pos) {
+        this.notes.push(new boxitNoteViewModel(title, descr, pos, self));
+    };
     this.orderNotes = function () {
         var tempNotes = self.notes();
         tempNotes.sort(function (l, r) {
@@ -45,7 +47,14 @@ function boxViewModel(id, user, name) {
         alert('Moving from: ' + sourcePos + ' to position: ' + targetNote.position());
         arg.item.position(targetNote.position());
         targetNote.position(sourcePos);
+        self.orderNotes();
     };
+}
+
+mainViewModel.prototype.toJSON = function () {
+    var copy = ko.toJS(this); 
+    delete copy.currentBox; //remove circular property
+    return copy; //return the copy to be serialized
 }
 
 function mainViewModel(userName) {
@@ -75,8 +84,8 @@ function mainViewModel(userName) {
         }
        
         // initialization code for the added box
-        var box = new boxViewModel(candidateId, self.name, nameParam);
-        box.addNote();
+        var box = new boxViewModel(candidateId, self.name(), nameParam);
+        box.addMockUpNote();
 
         self.boxes.push(box);
         self.currentBox(box);
@@ -87,10 +96,54 @@ function mainViewModel(userName) {
     this.removeBox = function (boxId) {
         this.boxes.remove(function (box) { return box.id == boxId; });
     };
-    this.restoreBoxes = function () {
+    this.restoreBoxes = function (inputName) {
         // use the user name to restore from local storage and do a full refresh if neccessary
+        // var key = self.name();
+        var storedData = window.localStorage.getItem(inputName);
+        if (storedData) {
+            var parsed = JSON.parse(storedData);
 
+            self.name(parsed.name);
+            self.currentBox(null);
+            self.boxes.removeAll();
+            for (var i = 0; i < parsed.boxes.length; i++) {
+                var parsedBox = parsed.boxes[i];
+                var box = new boxViewModel(parsedBox.boxId, inputName, parsedBox.boxName);
+                for (var j = 0; j < parsedBox.notes.length; j++) {
+                    var parsedNote = parsedBox.notes[j];
+                    var note = new boxitNoteViewModel(parsedNote.title, parsedNote.note, parsedNote.position, box);
+                    box.notes.push(note);
+                }
+                self.boxes.push(box);
+                if (self.currentBox() == null) {
+                    self.currentBox(box);
+                }
+            }
+        }
+        return storedData != null;
     };
-
-    this.addBox('This is Box Title');
+    this.saveBoxes = function(name) {
+        self.name(name);
+        var jsonfy = ko.toJSON(self);
+        
+        //alert(jsonfy);
+        
+        var storedData = window.localStorage.getItem(name);
+        if (storedData) {
+            //TODO Trigger notification
+            window.localStorage.removeItem(name);
+        }
+        window.localStorage.setItem(name, jsonfy);
+        return true;
+    }
+    this.isValidBoxName = function (inputName) {
+        var match = ko.utils.arrayFirst(self.boxes(), function (item) {
+            return item.boxName() === inputName;
+        });
+        return !match;
+    };
+    this.renameBox = function (inputName) {
+        self.currentBox().boxName(inputName);
+    };
+    this.addBox('Edit Box Title');
 }

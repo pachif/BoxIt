@@ -23,7 +23,7 @@
     
 </head>
 <body>
-    <nav class="navbar navbar-default" role="navigation">
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
         <div class="container-fluid">
             <!-- Brand and toggle get grouped for better mobile display -->
             <div class="navbar-header">
@@ -33,6 +33,14 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
+                <button type="button" class="btn btn-primary hidden-sm hidden-md hidden-lg" style="margin-top:7px" data-toggle="modal" data-origin="add" data-target="#boxModal">
+                    <i class="glyphicon glyphicon-inbox"></i>
+                </button>
+                <button type="button" class="btn btn-primary hidden-sm hidden-md hidden-lg" style="margin-top:7px" onclick="javascript: saveClicked();">
+                <i class="glyphicon glyphicon-floppy-disk"></i></button>
+                <button type="button" class="btn btn-primary hidden-sm hidden-md hidden-lg" style="margin-top:7px" data-toggle="modal" data-origin="restore" data-target="#boxModal">
+                    <i class="glyphicon glyphicon-floppy-open"></i></button>
+                
                 <a class="navbar-brand" href="#">BoxIT</a>
             </div>
             <!-- Collect the nav links, forms, and other content for toggling -->
@@ -41,12 +49,17 @@
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Your Boxes<span class="caret"></span></a>
                         <ul data-bind="foreach: boxes" class="dropdown-menu">
-                            <li> <a data-bind="text: boxName, click: $root.setCurrentBox"></a></li>
+                            <li> 
+                            <a data-bind="click: $root.setCurrentBox">
+                                <span data-bind="text: boxName"></span>
+                                <!--<i class="glyphicon glyphicon-check" data-bind="visible : $root.currentBox() == $data" />-->
+                                </a></li>
                         </ul>
                     </li>
-                    <li><a href="#" data-toggle="modal" data-target="#addBoxModal">Add New Box</a></li>
-                    <li><a href="#">Save</a></li>
-                    <li><a href="#">Restore</a></li>
+                    <li><a href="#" class="hidden-xs" data-toggle="modal" data-origin="add" data-target="#boxModal">Add New Box</a></li>
+                    <li><a href="#" class="hidden-xs" data-toggle="modal" data-origin="restore" data-target="#boxModal">Restore</a></li>
+                    <li><a href="#" class="hidden-xs" data-origin="save" onclick="javascript: saveClicked();">Save</a></li>
+                    
                 </ul>
                 <div class="nav navbar-nav navbar-right">
                     <form class="navbar-form navbar-left" role="search">
@@ -64,8 +77,9 @@
     </nav>
 
     <div class="container">
+        <hr /><hr /><hr />
         <div class="jumbotron hidden-xs">
-            <h1>Hello, 'Guest' user!</h1>
+            <h1>Hello, '<span data-bind="text: name"></span>' user!</h1>
             <p>The goal of this application is to keep stuff organized, it is a simple application you will enjoy!</p>
             <p class="text-muted">This will blow your mind</p>
         </div>
@@ -77,11 +91,13 @@
                     <div class="panel-heading">
                         <span data-bind="text: boxName"></span>
                         <div class="pull-right">
-                            <button id="addNoteButton" type="button" class="btn btn-xs btn-default" data-bind="click: addNote">
+                            <button id="addNoteButton" type="button" class="btn btn-xs btn-default" data-bind="click: addMockUpNote"
+                                    data-toggle="tooltip" data-placement="top" title="Add new Note to this box">
                                 <span class="glyphicon glyphicon-plus" />
                             </button>
-                            <button class="btn btn-xs btn-default">
-                                <span class="glyphicon glyphicon-inbox" />
+                            <button class="btn btn-xs btn-default" data-toggle="tooltip" data-placement="top" title="Rename this Box"
+                                    onclick="javascript: renameClicked();">
+                                <span class="glyphicon glyphicon-pencil" />
                             </button>
                         </div>
                         <div class="clearfix"></div>
@@ -135,7 +151,7 @@
 
     </div>
 
-    <div class="modal fade" id="addBoxModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal fade" id="boxModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -143,11 +159,11 @@
                     <h4 class="modal-title" id="myModalLabel">Box Dialog</h4>
                 </div>
                 <div class="modal-body">
-                    <p>Name of the Box:</p>
+                    <p id="modalBodyLabel">Name of the Box:</p>
                     <input type="text" class="form-control" id="boxNameInput" />
                 </div>
                 <div class="modal-footer">
-                    <button id="addBoxDialogButton" type="button" class="btn btn-primary">Add</button>
+                    <button id="confirmModalButton" type="button" class="btn btn-primary">Add</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -156,39 +172,38 @@
 
     <script id="singleNoteTemplate" type="text/html">
         
-        <div class="col-sm-4">
-            <input type="hidden" data-bind="value: position"/>
-            <div class="panel panel-primary boxIt-common" data-bind="visible : isReadMode">
-                <div class="panel-heading">
-                    <button type="button" class="btn btn-primary btn-xs" data-bind="click: onEdit">
-                        <span class="glyphicon glyphicon-edit" />
-                    </button>
-                    <span data-bind="text: title"></span>
-                    <div class="pull-right">
-                        <button type="button" class="btn btn-primary btn-xs" data-bind="click: removeNote"><span class="glyphicon glyphicon-trash"></span></button>
+            <div class="col-sm-4">
+                <input type="hidden" data-bind="value: position"/>
+                <div class="panel panel-primary boxIt-common" data-bind="visible : isReadMode">
+                    <div class="panel-heading">
+                        <button type="button" class="btn btn-primary btn-xs" data-bind="click: onEdit">
+                            <span class="glyphicon glyphicon-edit" />
+                        </button>
+                        <span data-bind="text: title"></span>
+                        <div class="pull-right">
+                            <button type="button" class="btn btn-primary btn-xs" data-bind="click: removeNote"><span class="glyphicon glyphicon-trash"></span></button>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+
+                        <p data-bind="text: note"></p>
+
                     </div>
                 </div>
-                <div class="panel-body">
-
-                    <p data-bind="text: note"></p>
-
+                <div class="panel panel-primary" data-bind="visible : isEditMode">
+                    <div class="panel-heading form-inline form-group-sm">
+                        <button class="btn btn-primary btn-sm" data-bind="click: onSave"><span class="glyphicon glyphicon-floppy-disk"></span></button>
+                        <input type="text" class="form-control" placeholder="Enter your title here" data-bind="value: title" />
+                    </div>
+                    <div class="panel-body">
+                        <textarea class="form-control" rows="5" data-bind="value: note"></textarea>
+                    </div>
                 </div>
-            </div>
-            <div class="panel panel-primary" data-bind="visible : isEditMode">
-                <div class="panel-heading form-inline form-group-sm">
-                    <button class="btn btn-primary btn-sm" data-bind="click: onSave"><span class="glyphicon glyphicon-floppy-disk" /></button>
-                    <input type="text" class="form-control" placeholder="Enter your title here" data-bind="value: title" />
 
-                </div>
-                <div class="panel-body">
-                    <textarea class="form-control" rows="5" data-bind="value: note"></textarea>
-                </div>
+
             </div>
 
-
-        </div>
-
-    </script>
+        </script>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="Scripts/jquery-1.9.1.min.js"></script>
@@ -204,29 +219,133 @@
     <!-- General Initialization -->
     <script>
 
-        $('#addBoxDialogButton').on('click', function (e) {
-            var vm = ko.contextFor(e.target).$data;
+        function saveClicked() {
+            var modal = $('#boxModal');
+            var mainVM = ko.contextFor(event.target).$data;
 
-            var boxName = $('#boxNameInput').val();
-            if (boxName != null && boxName.length > 0) {
-                vm.addBox(boxName);
+            modal.find('.modal-title').text('Save Data');
+            modal.find('#modalBodyLabel').text('Please input your name, remember it. It would be used to restore your data');
+            modal.find('#confirmModalButton').text('Save');
+
+            var currentUser = mainVM.name();    // get current user name
+            if (currentUser == "Guest") {
+                modal.modal('show');
+                $('#boxNameInput').focus();
+            } else {
+                var success = mainVM.saveBoxes(mainVM.name());
+                if (success) {
+                    triggerNotification("success", " You successfully saved your data");
+                }
+                
+            }
+        }
+
+        function renameClicked() {
+            var modal = $('#boxModal');
+
+            modal.find('.modal-title').text('Rename Box');
+            modal.find('#modalBodyLabel').text('Please input Box new name');
+            modal.find('#confirmModalButton').text('Rename');
+            modal.modal('show');
+        }
+
+        function triggerNotification(type, message) {
+            var alertHtml = "";
+            if (type == "success") {
+                // You successfully saved your data
+                alertHtml = "<div class='alert alert-success' role='alert'> <button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button> <strong>Well done!</strong> " + message + " </div>";
+            } else if (type == "fail") {
+                alertHtml = "<div class='alert alert-danger' role='alert'> <button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button> <strong>Oh no!</strong> " + message + " </div>";
+            }
+            jqueryAlert = $(alertHtml);
+            $('.container').prepend(jqueryAlert);
+            jqueryAlert.fadeOut(4000, function () { jqueryAlert.alert('close'); });
+            //jqueryAlert.delay(4000).slideUp(200, function () {
+            //    $(this).alert('close');
+            //});
+        }
+
+        $(document).ready(function () {
+            ko.applyBindings(new mainViewModel("Guest"));
+        });
+
+        $('#confirmModalButton').on('click', function (e) {
+            var button = $(this);
+            var vm = ko.contextFor(e.target).$data;
+            var boxNameInput = $('#boxNameInput').val();
+
+            if (boxNameInput == null || boxNameInput.length == 0) {
+                triggerNotification("fail", "You must provide a value");
+                $('#boxModal').modal('hide');
+                return;
             }
 
-            $('#addBoxModal').modal('hide');
+            if (button.text() == "Add") {
+                var success = vm.isValidBoxName(boxNameInput);
+                if (!success) {
+                    triggerNotification("fail", "That Box name alredy exist, please try with another");
+                } else {
+                    vm.addBox(boxNameInput);
+                }
+            }
+
+            if (button.text() == "Rename") {
+                var success = vm.isValidBoxName(boxNameInput);
+                if (!success) {
+                    triggerNotification("fail", "That Box name alredy exist, please try with another");
+                } else {
+                    vm.renameBox(boxNameInput);
+                }
+            }
+
+            if (button.text() == "Restore") {
+                var success = vm.restoreBoxes(boxNameInput);
+                if (!success) {
+                    triggerNotification("fail", "There is no stored boxes with provided name");
+                } 
+            }
+
+            if (button.text() == "Save") {
+                if (!window.localStorage) {
+                    triggerNotification("fail", 'Your Browser does not support local storage');
+                } else {
+                    var success = vm.saveBoxes(boxNameInput);
+                    if (success) {
+                        triggerNotification("success", "You successfully saved your data");
+                    }
+                }
+            }
+
+            $('#boxModal').modal('hide');
             $('#boxNameInput').val('');
         });
 
+        $('#boxModal').on('show.bs.modal', function () {
+            var modal = $(this);
+            var button = $(event.target);      // Button that triggered the modal
+            var origin = button.data('origin');  // Extract info from data-* attributes
+            var mainVM = ko.contextFor(event.target).$data;
 
-        $('#addBoxModal').on('show.bs.modal', function () {
+            switch (origin) {
+                case "add":
+                    modal.find('.modal-title').text('Add New Box');
+                    modal.find('#modalBodyLabel').text('Please enter the Box Name');
+                    modal.find('#confirmModalButton').text('Add');
+                    break;
+                case "rename":
+                    modal.find('.modal-title').text('Rename Box');
+                    modal.find('#modalBodyLabel').text('Please enter Box new name');
+                    modal.find('#confirmModalButton').text('Rename');
+                    break;
+                case "restore":
+                    modal.find('.modal-title').text('Restore Data');
+                    modal.find('#modalBodyLabel').text('Please enter the name you use to save your data');
+                    modal.find('#confirmModalButton').text('Restore');
+                    break;
+                default:
+            }
             $('#boxNameInput').focus();
         });
-
-        $(document).ready(function () {
-
-            var userName = "Guest";
-            ko.applyBindings(new mainViewModel(userName));
-        });
-        
     </script>
 </body>
 </html>

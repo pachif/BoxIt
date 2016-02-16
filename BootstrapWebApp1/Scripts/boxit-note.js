@@ -1,6 +1,16 @@
 ﻿/// <reference path="knockout-3.3.0.js" />
 
+boxitNoteViewModel.prototype.toJSON = function() {
+    var copy = ko.toJS(this); //easy way to get a clean copy
+    delete copy.parent; //remove circular property
+    delete copy.isEditMode;
+    delete copy.isReadMode;
+    return copy; //return the copy to be serialized
+}
+
 function boxitNoteViewModel(title, note, position, parentVM) {
+    ///<summary>create new instance ko VM</summary>
+    ///<param name="title">the title property</param>
     var self = this;
 
     this.title = ko.observable(title);
