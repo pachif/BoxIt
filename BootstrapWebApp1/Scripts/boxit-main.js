@@ -145,5 +145,17 @@ function mainViewModel(userName) {
     this.renameBox = function (inputName) {
         self.currentBox().boxName(inputName);
     };
+    this.getBoxByName = function(name) {
+        return ko.utils.arrayFirst(self.boxes(), function(item) {
+            return item.boxName() == name;
+        });
+    };
+    this.boxNames = ko.computed(function () {
+        var matches = new Array();
+        $.each(self.boxes(), function (i, r) {
+            matches.push(r.boxName());
+        });
+        return matches;
+    }, this);
     this.addBox('Edit Box Title');
 }

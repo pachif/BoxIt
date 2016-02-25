@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>BoxIt Organizer</title>
+    <title>NoteIt Organizer</title>
 
     <!-- Bootstrap -->
     <link href="Content/bootstrap.min.css" rel="stylesheet">
@@ -23,25 +23,25 @@
     
 </head>
 <body>
-    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
-        <div class="container-fluid">
+    <div class="container-fluid">
+        <nav class="navbar navbar-default" role="navigation">
+
             <!-- Brand and toggle get grouped for better mobile display -->
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
+                    <span class="glyphicon glyphicon-menu-hamburger"></span>
                 </button>
-                <button type="button" class="btn btn-primary hidden-sm hidden-md hidden-lg" style="margin-top:7px" data-toggle="modal" data-origin="add" data-target="#boxModal">
+                <button type="button" class="navbar-toggle" data-toggle="modal" data-origin="add" data-target="#boxModal">
                     <i class="glyphicon glyphicon-inbox"></i>
                 </button>
-                <button type="button" class="btn btn-primary hidden-sm hidden-md hidden-lg" style="margin-top:7px" onclick="javascript: saveClicked();">
-                <i class="glyphicon glyphicon-floppy-disk"></i></button>
-                <button type="button" class="btn btn-primary hidden-sm hidden-md hidden-lg" style="margin-top:7px" data-toggle="modal" data-origin="restore" data-target="#boxModal">
-                    <i class="glyphicon glyphicon-floppy-open"></i></button>
-                
-                <a class="navbar-brand" href="#">BoxIT</a>
+                <button type="button" class="navbar-toggle" onclick="javascript: saveClicked();">
+                    <i class="glyphicon glyphicon-floppy-disk"></i>
+                </button>
+                <button type="button" class="navbar-toggle" data-toggle="modal" data-origin="restore" data-target="#boxModal">
+                    <i class="glyphicon glyphicon-floppy-open"></i>
+                </button>
+
+                <a class="navbar-brand" href="#">NoteIT</a>
             </div>
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
@@ -49,43 +49,41 @@
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Your Boxes<span class="caret"></span></a>
                         <ul data-bind="foreach: boxes" class="dropdown-menu">
-                            <li> 
-                            <a data-bind="click: $root.setCurrentBox">
-                                <span data-bind="text: boxName"></span>
-                                <!--<i class="glyphicon glyphicon-check" data-bind="visible : $root.currentBox() == $data" />-->
-                                </a></li>
+                            <li>
+                                <a data-bind="click: $root.setCurrentBox">
+                                    <span data-bind="text: boxName"></span>
+                                    <!--<i class="glyphicon glyphicon-check" data-bind="visible : $root.currentBox() == $data" />-->
+                                </a>
+                            </li>
                         </ul>
                     </li>
                     <li><a href="#" class="hidden-xs" data-toggle="modal" data-origin="add" data-target="#boxModal">Add New Box</a></li>
                     <li><a href="#" class="hidden-xs" data-toggle="modal" data-origin="restore" data-target="#boxModal">Restore</a></li>
                     <li><a href="#" class="hidden-xs" data-origin="save" onclick="javascript: saveClicked();">Save</a></li>
-                    
+
                 </ul>
-                <div class="nav navbar-nav navbar-right">
-                    <form class="navbar-form navbar-left" role="search">
-                        <div class="form-group">
-                            <input type="text" class="form-control" placeholder="search in your boxes">
+                <div class="nav navbar-nav navbar-right hidden-xs">
+                    <div class="navbar-form" role="search">
+                        <div class="input-group">
+                            <input id="searchInput" type="text" class="form-control" placeholder="search in user directory">
                         </div>
-                        <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
-                    </form>
+                    </div>
                 </div>
 
             </div>
             <!-- /.navbar-collapse -->
-        </div>
-        <!-- /.container-fluid -->
-    </nav>
+            <!-- /.container-fluid -->
+        </nav>
 
-    <div class="container">
-        <hr /><hr /><hr />
         <div class="jumbotron hidden-xs">
             <h1>Hello, '<span data-bind="text: name"></span>' user!</h1>
             <p>The goal of this application is to keep stuff organized, it is a simple application you will enjoy!</p>
             <p class="text-muted">This will blow your mind</p>
         </div>
-    
+
+        <div class="row navbar-toggle"></div>
         <div class="row">
-        
+
             <div class="col-sm-12">
                 <div class="panel panel-default" data-bind="with: currentBox">
                     <div class="panel-heading">
@@ -103,50 +101,14 @@
                         <div class="clearfix"></div>
                     </div>
                     <div id="workAreaBody" class="panel-body drag-container">
-                        <!--<div class="col-sm-4">
-                            <div class="panel panel-primary boxIt-common">
-                                <div class="panel-heading">
-                                    <button type="button" class="btn btn-primary btn-xs" onclick="BoxIt.Note.beginEditMode(this)"><span class="glyphicon glyphicon-edit" /></button>
-                                    Note 1
-                                    <div class="pull-right">
-                                        <button type="button" class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-arrow-left"></span></button>
-                                        <button type="button" class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-arrow-right"></span></button>
-                                    </div>
-                                </div>
-                                
-
-                                <div class="panel-body">
-
-                                    <p>This is an Example 1</p>
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                                    <p>This is a Test</p>
-
-                                </div>
-                            </div>
-
-                            <div class="panel panel-primary hide">
-                                <div class="panel-heading form-inline form-group-sm">
-                                    <button class="btn btn-primary btn-sm" onclick="BoxIt.Note.endEditMode(this)"><span class="glyphicon glyphicon-floppy-disk" /></button>
-                                    <input type="text" class="form-control" placeholder="Enter your title here" itemscope="" />
-
-                                </div>
-                                <div class="panel-body">
-                                    <textarea class="form-control" rows="5"> Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-                                    </textarea>
-                                </div>
-                            </div>
-                        </div>-->
-
+                        <!-- Repeater -->
                         <div id="koBoxit" data-bind="sortable: { template : 'singleNoteTemplate', data: notes, afterMove : afterDropCallBack }">
                         </div>
 
                     </div>
                 </div>
             </div>
-        
+
         </div>
 
     </div>
@@ -207,12 +169,13 @@
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="Scripts/jquery-1.9.1.min.js"></script>
+    <script src="Scripts/jquery-ui.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="Scripts/bootstrap.min.js"></script>
-
-    <script src="Scripts/jquery-ui.js"></script>
+    
     <script src="Scripts/knockout-3.3.0.js"></script>
     <script src="Scripts/knockout-sortable.js"></script>
+    <script src="Scripts/strapcomplete.js"></script>
 
     <script src="Scripts/boxit-note.js"></script>
     <script src="Scripts/boxit-main.js"></script>
@@ -266,8 +229,20 @@
         }
 
         $(document).ready(function () {
-            ko.applyBindings(new mainViewModel("Guest"));
+            globalKo = new mainViewModel("Guest");
+            ko.applyBindings(globalKo);
         });
+
+        $('#searchInput').strapcomplete(null,
+            {
+                afterSelectionEvent: function (val) {
+                    var boxVM = globalKo.getBoxByName(val);
+                    globalKo.setCurrentBox(boxVM);
+                },
+                updateDataSetFunction: function () {
+                    return globalKo.boxNames();
+                }
+            });
 
         $('#confirmModalButton').on('click', function (e) {
             var button = $(this);

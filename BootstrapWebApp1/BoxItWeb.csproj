@@ -93,6 +93,7 @@
     <Content Include="Scripts\knockout-sortable.js" />
     <Content Include="Scripts\knockout.dragdrop.js" />
     <Content Include="Scripts\modernizr.custom.js" />
+    <Content Include="Scripts\strapcomplete.js" />
     <Content Include="Web.config" />
     <Content Include="Scripts\jquery-1.9.1.min.map" />
   </ItemGroup>
